@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func main() {
+func trace() {
 	for i := 0; i < 5; i++ {
 		time.Sleep(time.Second)
 	}
