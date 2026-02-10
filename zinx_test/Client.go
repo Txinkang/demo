@@ -2,35 +2,51 @@ package main
 
 import (
 	"fmt"
+	"github.com/Txinkang/zinx/znet"
 	"net"
-	"time"
 )
 
 func main() {
-	fmt.Println("clientTest start")
-	time.Sleep(3 * time.Second)
-
-	conn, err := net.Dial("tcp", "127.0.0.1:7777")
+	conn, err := net.Dial("tcp", "localhost:7777")
 	if err != nil {
-		fmt.Println("client start err: ", err)
+		fmt.Println("Error Dial:", err.Error())
 		return
 	}
 
+	//创建封包拆包对象
+	dp := znet.NewDataPack()
+
+	// 创建msg1
+	msg1 := &znet.Message{
+		Id:      0,
+		DataLen: 5,
+		Data:    []byte{'h', 'e', 'l', 'l', 'o'},
+	}
+	sendData1, err := dp.Pack(msg1)
+	if err != nil {
+		fmt.Println("Error Pack:", err.Error())
+		return
+	}
+	// 创建msg2
+	msg2 := &znet.Message{
+		Id:      0,
+		DataLen: 6,
+		Data:    []byte{'w', 'o', 'r', 'l', 'd', '!'},
+	}
+	sendData2, err := dp.Pack(msg2)
+	if err != nil {
+		fmt.Println("Error Pack:", err.Error())
+		return
+	}
+
+	// 连接消息
+	sendData1 = append(sendData1, sendData2...)
+
+	// 发送消息
+	conn.Write(sendData1)
+
+	// 客户端阻塞
+	//select {}
 	for {
-		_, err := conn.Write([]byte("hello zinx"))
-		if err != nil {
-			fmt.Println("client write err: ", err)
-			return
-		}
-
-		buf := make([]byte, 512)
-		cnt, err := conn.Read(buf)
-		if err != nil {
-			fmt.Println("client read err: ", err)
-			return
-		}
-		fmt.Printf("server call back: %s, cnt = %d\n", buf[:cnt], cnt)
-
-		time.Sleep(time.Second)
 	}
 }
